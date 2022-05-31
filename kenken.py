@@ -168,3 +168,8 @@ class kenkenGame(csp.CSP):
         for members, operator, target in cliques:
             self.meta[members] = (operator, target)
             self.padding = max(self.padding, len(str(target)))        
+
+
+    def constraint(self, A, a, B, b):
+        self.checks += 1
+        return A == B or not generateKenkenPuzzle.conflicting(A, a, B, b)
