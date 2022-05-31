@@ -277,6 +277,11 @@ class kenkenGame(csp.CSP):
         return api_result
 
 
+    def answerToDictionary(result):
+        api_result = {
+            'result': result,
+        }
+        return api_result
 
 
 
