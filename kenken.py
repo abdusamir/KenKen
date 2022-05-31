@@ -292,5 +292,41 @@ class kenkenGame(csp.CSP):
             return assignment, (kenken.checks, kenken.nassigns, dt)
 
 
+    def gather(iterations,start_size,end_size,out):
+        if start_size < 3:
+            start_size = 3
+
+        bt         = lambda ken: csp.CSP.backtracking_search(ken)
+        fc         = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.forward_checking)
+        mac        = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.mac)
+
+        algorithms = {
+            "Backtracking": bt,
+            "Forward Checking": fc,
+            "Arc Consistency": mac,
+        }
+
+        with open(out, "w+") as file:
+
+            out = writer(file)
+
+            out.writerow(["Algorithm", "Size", "Number of Tests Boards", "Average Completion time"])
+
+            for name, algorithm in algorithms.items():
+                for size in range(start_size, end_size+1):
+                    checks, assignments, dt = (0, 0, 0)
+                    for iteration in range(1, iterations + 1):
+                        cliques = generateKenkenPuzzle.generate(size)
+
+                        assignment, data = kenkenGame.benchmark(kenkenGame(size, cliques), algorithm)
+
+                        print("algorithm =",  name, "size =", size, "iteration =", iteration, "result =", "Success" if assignment else "Failure", file=stderr)
+
+                        checks      += data[0] / iterations
+                        assignments += data[1] / iterations
+                        dt          += data[2] / iterations
+                        
+                    out.writerow([name, size, iterations, dt])
+
 
 
