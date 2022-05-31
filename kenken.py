@@ -138,3 +138,16 @@ class generateKenkenPuzzle():
             domains[members] = list(filter(qualifies, domains[members]))
         return domains
 
+    def gneighbors(cliques):
+        neighbors = {}
+        for members, _, _ in cliques:
+            neighbors[members] = []
+
+        for A, _, _ in cliques:
+            for B, _, _ in cliques:
+                if A != B and B not in neighbors[A]:
+                    if generateKenkenPuzzle.conflicting(A, [-1] * len(A), B, [-1] * len(B)):
+                        neighbors[A].append(B)
+                        neighbors[B].append(A)
+
+        return neighbors
