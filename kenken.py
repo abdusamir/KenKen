@@ -173,3 +173,34 @@ class kenkenGame(csp.CSP):
     def constraint(self, A, a, B, b):
         self.checks += 1
         return A == B or not generateKenkenPuzzle.conflicting(A, a, B, b)
+
+
+    def get_result_arr(self, assignment):
+        if assignment:
+            atomic = {}
+            for members in self.variables:
+                values = assignment.get(members)
+                if values:
+                    for i in range(len(members)):
+                        atomic[members[i]] = values[i]
+                else:
+                    for member in members:
+                        atomic[member] = None
+        else:
+            atomic = {member:None for members in self.variables for member in members}
+
+        atomic = sorted(atomic.items(), key=lambda item: item[0][1] * self.size + item[0][0])
+
+        global result_arr 
+        result_arr = []
+        for i in range (len(atomic)):
+            result_arr.append(atomic[i][1])
+        return result_arr
+
+
+
+
+
+
+
+
