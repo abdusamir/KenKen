@@ -248,6 +248,33 @@ class kenkenGame(csp.CSP):
             operation[operator_box[0]][operator_box[1]] = operation_string
         return operation, remove_border
      
+        
+    def puzzleToDictionary(remove_border,operation):
+        api_result = {}
+        values= []
+        for row in remove_border:
+            for col in row:
+                borders={
+                    'top':col[0],
+                    'bottom':col[1],
+                    'left':col[2],
+                    'right':col[3]
+                }
+                values.append(borders)
+                
+        op=[]
+        for row in operation:
+            for col in row:
+                if col==['0']:
+                    op.append('0')
+                elif col[0]=='.':
+                    op.append('*' + col[1:])
+                else:
+                    op.append(col)      
+        for index,value in enumerate(op):
+            values[index]['value']=value
+        api_result['values']= values
+        return api_result
 
 
 
