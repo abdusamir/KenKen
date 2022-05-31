@@ -198,6 +198,56 @@ class kenkenGame(csp.CSP):
         return result_arr
 
 
+    def gui_border_configurations(cliques_gui,size):
+        global top
+        global bottom
+        global left
+        global right
+        top=0
+        bottom=1
+        left=2
+        right=3
+        remove_border = [[[0 for i in range(4)] for j in range(size)]for k in range(size)]
+        operation = [[[ '0' for i in range(1)] for j in range(size)]for k in range(size)]
+        for i in range (len(cliques_gui)):
+            operator_box=999
+            operation_string = ''
+            if(cliques_gui[i][-2]=='-' and cliques_gui[i][-1] < 0):
+                operation_string = '+'+str(cliques_gui[i][-1])[1:]
+            else:
+                operation_string=str(cliques_gui[i][-2])+str(cliques_gui[i][-1])
+            if(len(cliques_gui[i][0]) == 1):
+                operator_box= [cliques_gui[i][0][0][0]-1,cliques_gui[i][0][0][1]-1]
+            for j in range (len(cliques_gui[i][0])-1):
+                pos1 = [cliques_gui[i][0][j][0]-1,cliques_gui[i][0][j][1]-1]
+                if operator_box == 999:
+                    operator_box=pos1
+
+                for k in range(j+1,len(cliques_gui[i][0])):
+                    pos2 = [cliques_gui[i][0][k][0]-1,cliques_gui[i][0][k][1]-1]
+                    if(pos1[0] == pos2[0] or pos1[1] == pos2[1]):
+                        if pos1[0] != pos2[0] and ((pos1[0] == pos2[0]-1) or (pos1[0] == pos2[0]+1)):
+                            if(pos1[0]<pos2[0]):
+                                remove_border[pos1[0]][pos1[1]][bottom]=1
+                                remove_border[pos2[0]][pos2[1]][top]=1
+                                if(operator_box[0] > pos1[0] ):
+                                    operator_box=pos1
+                            if(pos1[0]>pos2[0]):
+                                remove_border[pos1[0]][pos1[1]][top]=1
+                                remove_border[pos2[0]][pos2[1]][bottom]=1
+                                if(operator_box[0] > pos2[0] ):
+                                    operator_box=pos2
+                
+                        if(pos1[1] != pos2[1] and ((pos1[1] == pos2[1]-1) or (pos1[1] == pos2[1]+1))):
+                            if(pos1[1]<pos2[1]):
+                                remove_border[pos1[0]][pos1[1]][right]=1
+                                remove_border[pos2[0]][pos2[1]][left]=1
+                            if(pos1[1]>pos2[1]):
+                                remove_border[pos1[0]][pos1[1]][left]=1
+                                remove_border[pos2[0]][pos2[1]][right]=1
+            operation[operator_box[0]][operator_box[1]] = operation_string
+        return operation, remove_border
+     
 
 
 
