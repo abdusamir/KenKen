@@ -284,5 +284,13 @@ class kenkenGame(csp.CSP):
         return api_result
 
 
+    def benchmark(kenken, algorithm):
+            kenken.checks = kenken.nassigns = 0
+            dt = time()
+            assignment = algorithm(kenken)
+            dt = time() - dt
+            return assignment, (kenken.checks, kenken.nassigns, dt)
+
+
 
 
