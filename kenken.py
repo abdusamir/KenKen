@@ -109,5 +109,24 @@ class generateKenkenPuzzle():
     def RowXorCol(xy1, xy2):
         return (xy1[0] == xy2[0]) != (xy1[1] == xy2[1])
 
+    def conflicting(A, a, B, b):
+        for i in range(len(A)):
+            for j in range(len(B)):
+                mA = A[i]
+                mB = B[j]
+
+                ma = a[i]
+                mb = b[j]
+                if generateKenkenPuzzle.RowXorCol(mA, mB) and ma == mb:
+                    return True
+
+        return False
+
+    def satisfies(values, operation, target):
+        for p in permutations(values):
+            if reduce(operation, p) == target:
+                return True
+
+        return False
 
 
