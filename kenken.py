@@ -129,4 +129,12 @@ class generateKenkenPuzzle():
 
         return False
 
+    def gdomains(size, cliques):
+        domains = {}
+        for clique in cliques:
+            members, operator, target = clique
+            domains[members] = list(product(range(1, size + 1), repeat=len(members)))
+            qualifies = lambda values: not generateKenkenPuzzle.conflicting(members, values, members, values) and generateKenkenPuzzle.satisfies(values, generateKenkenPuzzle.operation(operator), target)
+            domains[members] = list(filter(qualifies, domains[members]))
+        return domains
 
