@@ -151,3 +151,20 @@ class generateKenkenPuzzle():
                         neighbors[B].append(A)
 
         return neighbors
+
+
+class kenkenGame(csp.CSP):
+
+    def __init__(self, size, cliques):
+        generateKenkenPuzzle.validate(size, cliques)
+        variables = [members for members, _, _ in cliques]
+        domains = generateKenkenPuzzle.gdomains(size, cliques)
+        neighbors = generateKenkenPuzzle.gneighbors(cliques)
+        csp.CSP.__init__(self, variables, domains, neighbors, self.constraint)
+        self.size = size
+        self.checks = 0
+        self.padding = 0
+        self.meta = {}
+        for members, operator, target in cliques:
+            self.meta[members] = (operator, target)
+            self.padding = max(self.padding, len(str(target)))        
