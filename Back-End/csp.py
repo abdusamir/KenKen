@@ -40,4 +40,21 @@ class CSP(Problem):
         if var in assignment:
             del assignment[var]
 
+    def nconflicts(self, var, val, assignment):
+        def conflict(var2):
+            return (var2 in assignment and
+                    not self.constraints(var, val, var2, assignment[var2]))
+        return utilities.count(conflict(v) for v in self.neighbors[var])
+
+
+    def result(self, state, action):
+        (var, val) = action
+        return state + ((var, val),)
+
+    def goal_test(self, state):
+        assignment = dict(state)
+        return (len(assignment) == len(self.variables)
+                and all(self.nconflicts(variables, assignment[variables], assignment) == 0
+                        for variables in self.variables))
+
 
