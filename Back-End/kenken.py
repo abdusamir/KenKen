@@ -329,4 +329,26 @@ class kenkenGame(csp.CSP):
                     out.writerow([name, size, iterations, dt])
 
 
+class serverFunctions(kenkenGame):
+    def getKenkenPuzzle(size):
+        cliques = generateKenkenPuzzle.generate(size)
+        puzzleObject = kenkenGame(size, cliques)
+        operation_str, border_config = kenkenGame.gui_border_configurations(cliques,size)
+        puzzle=kenkenGame.puzzleToDictionary(border_config,operation_str)
+        return puzzle, puzzleObject
+
+
+    def solveKenkenPuzzle(puzzleConfig,algorithm):
+        global assignment
+        if algorithm ==0:
+            assignment = csp.CSP.backtracking_search(puzzleConfig)
+        elif algorithm ==1:
+            assignment = csp.CSP.backtracking_search(puzzleConfig,inference=csp.CSP.forward_checking)
+        elif algorithm ==2:
+            assignment = csp.CSP.backtracking_search(puzzleConfig,inference=csp.CSP.mac)
+
+        result_arr=puzzleConfig.get_result_arr(assignment)
+        result=kenkenGame.answerToDictionary(result_arr)
+        return result     
+
 
