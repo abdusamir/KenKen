@@ -151,3 +151,214 @@ class generateKenkenPuzzle():
                         neighbors[B].append(A)
 
         return neighbors
+
+
+class kenkenGame(csp.CSP):
+
+    def __init__(self, size, cliques):
+        generateKenkenPuzzle.validate(size, cliques)
+        variables = [members for members, _, _ in cliques]
+        domains = generateKenkenPuzzle.gdomains(size, cliques)
+        neighbors = generateKenkenPuzzle.gneighbors(cliques)
+        csp.CSP.__init__(self, variables, domains, neighbors, self.constraint)
+        self.size = size
+        self.checks = 0
+        self.padding = 0
+        self.meta = {}
+        for members, operator, target in cliques:
+            self.meta[members] = (operator, target)
+            self.padding = max(self.padding, len(str(target)))        
+
+
+    def constraint(self, A, a, B, b):
+        self.checks += 1
+        return A == B or not generateKenkenPuzzle.conflicting(A, a, B, b)
+
+
+    def get_result_arr(self, assignment):
+        if assignment:
+            atomic = {}
+            for members in self.variables:
+                values = assignment.get(members)
+                if values:
+                    for i in range(len(members)):
+                        atomic[members[i]] = values[i]
+                else:
+                    for member in members:
+                        atomic[member] = None
+        else:
+            atomic = {member:None for members in self.variables for member in members}
+
+        atomic = sorted(atomic.items(), key=lambda item: item[0][1] * self.size + item[0][0])
+
+        global result_arr 
+        result_arr = []
+        for i in range (len(atomic)):
+            result_arr.append(atomic[i][1])
+        return result_arr
+
+
+    def gui_border_configurations(cliques_gui,size):
+        global top
+        global bottom
+        global left
+        global right
+        top=0
+        bottom=1
+        left=2
+        right=3
+        remove_border = [[[0 for i in range(4)] for j in range(size)]for k in range(size)]
+        operation = [[[ '0' for i in range(1)] for j in range(size)]for k in range(size)]
+        for i in range (len(cliques_gui)):
+            operator_box=999
+            operation_string = ''
+            if(cliques_gui[i][-2]=='-' and cliques_gui[i][-1] < 0):
+                operation_string = '+'+str(cliques_gui[i][-1])[1:]
+            else:
+                operation_string=str(cliques_gui[i][-2])+str(cliques_gui[i][-1])
+            if(len(cliques_gui[i][0]) == 1):
+                operator_box= [cliques_gui[i][0][0][0]-1,cliques_gui[i][0][0][1]-1]
+            for j in range (len(cliques_gui[i][0])-1):
+                pos1 = [cliques_gui[i][0][j][0]-1,cliques_gui[i][0][j][1]-1]
+                if operator_box == 999:
+                    operator_box=pos1
+
+                for k in range(j+1,len(cliques_gui[i][0])):
+                    pos2 = [cliques_gui[i][0][k][0]-1,cliques_gui[i][0][k][1]-1]
+                    if(pos1[0] == pos2[0] or pos1[1] == pos2[1]):
+                        if pos1[0] != pos2[0] and ((pos1[0] == pos2[0]-1) or (pos1[0] == pos2[0]+1)):
+                            if(pos1[0]<pos2[0]):
+                                remove_border[pos1[0]][pos1[1]][bottom]=1
+                                remove_border[pos2[0]][pos2[1]][top]=1
+                                if(operator_box[0] > pos1[0] ):
+                                    operator_box=pos1
+                            if(pos1[0]>pos2[0]):
+                                remove_border[pos1[0]][pos1[1]][top]=1
+                                remove_border[pos2[0]][pos2[1]][bottom]=1
+                                if(operator_box[0] > pos2[0] ):
+                                    operator_box=pos2
+                
+                        if(pos1[1] != pos2[1] and ((pos1[1] == pos2[1]-1) or (pos1[1] == pos2[1]+1))):
+                            if(pos1[1]<pos2[1]):
+                                remove_border[pos1[0]][pos1[1]][right]=1
+                                remove_border[pos2[0]][pos2[1]][left]=1
+                            if(pos1[1]>pos2[1]):
+                                remove_border[pos1[0]][pos1[1]][left]=1
+                                remove_border[pos2[0]][pos2[1]][right]=1
+            operation[operator_box[0]][operator_box[1]] = operation_string
+        return operation, remove_border
+     
+        
+    def puzzleToDictionary(remove_border,operation):
+        api_result = {}
+        values= []
+        for row in remove_border:
+            for col in row:
+                borders={
+                    'top':col[0],
+                    'bottom':col[1],
+                    'left':col[2],
+                    'right':col[3]
+                }
+                values.append(borders)
+                
+        op=[]
+        for row in operation:
+            for col in row:
+                if col==['0']:
+                    op.append('0')
+                elif col[0]=='.':
+                    op.append('*' + col[1:])
+                else:
+                    op.append(col)      
+        for index,value in enumerate(op):
+            values[index]['value']=value
+        api_result['values']= values
+        return api_result
+
+
+    def answerToDictionary(result):
+        api_result = {
+            'result': result,
+        }
+        return api_result
+
+
+    def benchmark(kenken, algorithm):
+            kenken.checks = kenken.nassigns = 0
+            dt = time()
+            assignment = algorithm(kenken)
+            dt = time() - dt
+            return assignment, (kenken.checks, kenken.nassigns, dt)
+
+
+    def gather(iterations,start_size,end_size,out):
+        if start_size < 3:
+            start_size = 3
+
+        bt         = lambda ken: csp.CSP.backtracking_search(ken)
+        fc         = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.forward_checking)
+        mac        = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.mac)
+
+        algorithms = {
+            "Backtracking": bt,
+            "Forward Checking": fc,
+            "Arc Consistency": mac,
+        }
+
+        with open(out, "w+") as file:
+
+            out = writer(file)
+
+            out.writerow(["Algorithm", "Size", "Number of Tests Boards", "Average Completion time"])
+
+            for name, algorithm in algorithms.items():
+                for size in range(start_size, end_size+1):
+                    checks, assignments, dt = (0, 0, 0)
+                    for iteration in range(1, iterations + 1):
+                        cliques = generateKenkenPuzzle.generate(size)
+
+                        assignment, data = kenkenGame.benchmark(kenkenGame(size, cliques), algorithm)
+
+                        print("algorithm =",  name, "size =", size, "iteration =", iteration, "result =", "Success" if assignment else "Failure", file=stderr)
+
+                        checks      += data[0] / iterations
+                        assignments += data[1] / iterations
+                        dt          += data[2] / iterations
+                        
+                    out.writerow([name, size, iterations, dt])
+
+
+class serverFunctions(kenkenGame):
+    def getKenkenPuzzle(size):
+        cliques = generateKenkenPuzzle.generate(size)
+        puzzleObject = kenkenGame(size, cliques)
+        operation_str, border_config = kenkenGame.gui_border_configurations(cliques,size)
+        puzzle=kenkenGame.puzzleToDictionary(border_config,operation_str)
+        return puzzle, puzzleObject
+
+
+    def solveKenkenPuzzle(puzzleConfig,algorithm):
+        global assignment
+        if algorithm ==0:
+            assignment = csp.CSP.backtracking_search(puzzleConfig)
+        elif algorithm ==1:
+            assignment = csp.CSP.backtracking_search(puzzleConfig,inference=csp.CSP.forward_checking)
+        elif algorithm ==2:
+            assignment = csp.CSP.backtracking_search(puzzleConfig,inference=csp.CSP.mac)
+
+        result_arr=puzzleConfig.get_result_arr(assignment)
+        result=kenkenGame.answerToDictionary(result_arr)
+        return result     
+
+
+        
+if __name__ == "__main__":
+
+    size = 3
+    algorithm = 2
+    puzzle, puzzleObject = serverFunctions.getKenkenPuzzle(size=size)
+    result = serverFunctions.solveKenkenPuzzle(puzzleConfig=puzzleObject, algorithm=algorithm)
+    puzzleWithResult = {**result, **puzzle}
+    print(puzzleWithResult)
+

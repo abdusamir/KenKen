@@ -18,7 +18,30 @@ class utilities():
     def is_in(elt, seq):
         return any(x is elt for x in seq)
 
+class Problem(object):
 
+    def __init__(self, initial, goal=None):
+        self.initial = initial
+        self.goal = goal
+
+    def actions(self, state):
+        raise NotImplementedError
+
+    def result(self, state, action):
+        raise NotImplementedError
+
+    def goal_test(self, state):
+        if isinstance(self.goal, list):
+            return utilities.is_in(state, self.goal)
+        else:
+            return state == self.goal
+
+    def path_cost(self, c, state1, action, state2):
+        return c + 1
+
+    def value(self, state):
+        raise NotImplementedError
+        
 # ...................
 class CSP(Problem):
 
@@ -39,5 +62,26 @@ class CSP(Problem):
     def unassign(self, var, assignment):
         if var in assignment:
             del assignment[var]
+
+
+# **********
+    def nconflicts(self, var, val, assignment):
+        def conflict(var2):
+            return (var2 in assignment and
+                    not self.constraints(var, val, var2, assignment[var2]))
+        return utilities.count(conflict(v) for v in self.neighbors[var])
+
+
+    def result(self, state, action):
+        (var, val) = action
+        return state + ((var, val),)
+
+    def goal_test(self, state):
+        assignment = dict(state)
+        return (len(assignment) == len(self.variables)
+                and all(self.nconflicts(variables, assignment[variables], assignment) == 0
+                        for variables in self.variables))
+
+
 
 
