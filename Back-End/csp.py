@@ -63,6 +63,8 @@ class CSP(Problem):
         if var in assignment:
             del assignment[var]
 
+
+# **********
     def nconflicts(self, var, val, assignment):
         def conflict(var2):
             return (var2 in assignment and
@@ -79,5 +81,7 @@ class CSP(Problem):
         return (len(assignment) == len(self.variables)
                 and all(self.nconflicts(variables, assignment[variables], assignment) == 0
                         for variables in self.variables))
+
+
 
 
