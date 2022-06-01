@@ -45,78 +45,7 @@ export default function BasicModal({ hanldeGenerate, modalOpen }) {
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "column",
-            }}
-          >
-            <Typography variant="h2" gutterBottom component="div">
-              KenKen
-            </Typography>
-            <Typography
-              variant="h5"
-              gutterBottom
-              component="div"
-              style={{ margin: "20px 0" }}
-            >
-              Choose CSP Algorithm
-            </Typography>
-            <FormControl>
-              <RadioGroup
-                aria-labelledby="demo-radio-buttons-group-label"
-                defaultValue="female"
-                name="radio-buttons-group"
-                onChange={(e) =>
-                  setInfo({ ...info, algorithm: e.target.value })
-                }
-              >
-                <FormControlLabel
-                  value="0"
-                  control={<Radio />}
-                  label="Backtracking"
-                />
-                <FormControlLabel
-                  value="1"
-                  control={<Radio />}
-                  label="Backtracking with forward checking"
-                />
-                <FormControlLabel
-                  value="2"
-                  control={<Radio />}
-                  label="Backtracking with forward checking and arc consistency"
-                />
-              </RadioGroup>
-            </FormControl>
-            <Typography
-              variant="h5"
-              gutterBottom
-              component="div"
-              style={{ marginTop: "30px" }}
-            >
-              Choose board size:
-            </Typography>
-            <TextField
-              id="standard-basic"
-              variant="standard"
-              type="number"
-              onChange={(e) => setInfo({ ...info, size: e.target.value })}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ margin: "30px 0" }}
-              onClick={handleOnClick}
-            >
-              Generate Puzzle
-            </Button>
-          </div>
-        </Box>
-      </Modal>
+      ></Modal>
     </div>
   );
 }
