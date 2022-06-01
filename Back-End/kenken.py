@@ -352,3 +352,13 @@ class serverFunctions(kenkenGame):
         return result     
 
 
+        
+if __name__ == "__main__":
+
+    size = 3
+    algorithm = 2
+    puzzle, puzzleObject = serverFunctions.getKenkenPuzzle(size=size)
+    result = serverFunctions.solveKenkenPuzzle(puzzleConfig=puzzleObject, algorithm=algorithm)
+    puzzleWithResult = {**result, **puzzle}
+    print(puzzleWithResult)
+
