@@ -107,3 +107,12 @@ class CSP(Problem):
                 csp.prune(Xi, x, removals)
                 revised = True
         return revised
+
+    def first_unassigned_variable(assignment, csp):
+        return utilities.first([var for var in csp.variables if var not in assignment])
+
+    def unordered_domain_values(var, assignment, csp):
+        return csp.choices(var)
+
+    def no_inference(csp, var, value, assignment, removals):
+        return True
