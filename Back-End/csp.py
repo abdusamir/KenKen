@@ -103,6 +103,9 @@ class CSP(Problem):
     def choices(self, var):
         return (self.curr_domains or self.domains)[var]
 
+    def restore(self, removals):
+        for B, b in removals:
+            self.curr_domains[B].append(b)
     
     def revise(csp, Xi, Xj, removals):
         revised = False
