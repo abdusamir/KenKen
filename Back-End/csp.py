@@ -116,3 +116,22 @@ class CSP(Problem):
 
     def no_inference(csp, var, value, assignment, removals):
         return True
+
+
+
+
+    def backtrack(assignment):
+            if len(assignment) == len(csp.variables):
+                return assignment
+            var = select_unassigned_variable(assignment, csp)
+            for value in order_domain_values(var, assignment, csp):
+                if 0 == csp.nconflicts(var, value, assignment):
+                    csp.assign(var, value, assignment)
+                    removals = csp.suppose(var, value)
+                    if inference(csp, var, value, assignment, removals):
+                        result = backtrack(assignment)
+                        if result is not None:
+                            return result
+                    csp.restore(removals)
+            csp.unassign(var, assignment)
+            return None
