@@ -15,8 +15,7 @@ class utilities():
         except TypeError:
             return next(iterable, default)
 
-    def is_in(elt, seq):
-        return any(x is elt for x in seq)
+
 
 class Problem(object):
 
