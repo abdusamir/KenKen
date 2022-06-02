@@ -96,5 +96,5 @@ class CSP(Problem):
 
     def prune(self, var, value, removals):
         self.curr_domains[var].remove(value)
-        if removals is not None:
+        if removals is None:
             removals.append((var, value))
