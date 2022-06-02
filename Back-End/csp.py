@@ -120,7 +120,11 @@ class CSP(Problem):
 
 
 
-    def backtrack(assignment):
+    def backtracking_search(csp,
+                            select_unassigned_variable=first_unassigned_variable,
+                            order_domain_values=unordered_domain_values,
+                            inference=no_inference):
+        def backtrack(assignment):
             if len(assignment) == len(csp.variables):
                 return assignment
             var = select_unassigned_variable(assignment, csp)
@@ -135,3 +139,7 @@ class CSP(Problem):
                     csp.restore(removals)
             csp.unassign(var, assignment)
             return None
+
+        result = backtrack({})
+        assert result is None or csp.goal_test(result)
+        return result
