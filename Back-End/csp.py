@@ -98,3 +98,12 @@ class CSP(Problem):
         self.curr_domains[var].remove(value)
         if removals is not None:
             removals.append((var, value))
+
+    
+    def revise(csp, Xi, Xj, removals):
+        revised = False
+        for x in csp.curr_domains[Xi][:]:
+            if all(not csp.constraints(Xi, x, Xj, y) for y in csp.curr_domains[Xj]):
+                csp.prune(Xi, x, removals)
+                revised = True
+        return revised
