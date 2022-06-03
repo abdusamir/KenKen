@@ -147,7 +147,9 @@ class CSP(Problem):
                 if not csp.curr_domains[B]:
                     return False
         return True
-
+    def mac(csp, var, value, assignment, removals):
+        #Maintain arc consistency.
+        return CSP.AC3(csp, [(X, var) for X in csp.neighbors[var]], removals)
 
     def backtracking_search(csp,
                             select_unassigned_variable=first_unassigned_variable,
