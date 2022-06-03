@@ -106,7 +106,20 @@ class CSP(Problem):
     def restore(self, removals):
         for B, b in removals:
             self.curr_domains[B].append(b)
-    
+            
+    def AC3(csp, queue=None, removals=None):
+        if queue is None:
+            queue = [(Xi, Xk) for Xi in csp.variables for Xk in csp.neighbors[Xi]]
+        csp.support_pruning()
+        while queue:
+            (Xi, Xj) = queue.pop()
+            if CSP.revise(csp, Xi, Xj, removals):
+                if not csp.curr_domains[Xi]:
+                    return False
+                for Xk in csp.neighbors[Xi]:
+                    if Xk != Xj:
+                        queue.append((Xk, Xi))
+        return True
     def revise(csp, Xi, Xj, removals):
         revised = False
         for x in csp.curr_domains[Xi][:]:
