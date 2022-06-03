@@ -106,7 +106,7 @@ class CSP(Problem):
     def restore(self, removals):
         for B, b in removals:
             self.curr_domains[B].append(b)
-            
+
     def AC3(csp, queue=None, removals=None):
         if queue is None:
             queue = [(Xi, Xk) for Xi in csp.variables for Xk in csp.neighbors[Xi]]
@@ -137,7 +137,16 @@ class CSP(Problem):
     def no_inference(csp, var, value, assignment, removals):
         return True
 
-
+    def forward_checking(csp, var, value, assignment, removals):
+        csp.support_pruning()
+        for B in csp.neighbors[var]:
+            if B not in assignment:
+                for b in csp.curr_domains[B][:]:
+                    if not csp.constraints(var, value, B, b):
+                        csp.prune(B, b, removals)
+                if not csp.curr_domains[B]:
+                    return False
+        return True
 
 
     def backtracking_search(csp,
