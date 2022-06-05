@@ -152,7 +152,6 @@ class generateKenkenPuzzle():
 
         return neighbors
 
-
 class kenkenGame(csp.CSP):
 
     def __init__(self, size, cliques):
@@ -173,7 +172,6 @@ class kenkenGame(csp.CSP):
     def constraint(self, A, a, B, b):
         self.checks += 1
         return A == B or not generateKenkenPuzzle.conflicting(A, a, B, b)
-
 
     def get_result_arr(self, assignment):
         if assignment:
@@ -197,6 +195,49 @@ class kenkenGame(csp.CSP):
             result_arr.append(atomic[i][1])
         return result_arr
 
+
+    def benchmark(kenken, algorithm):
+            kenken.checks = kenken.nassigns = 0
+            dt = time()
+            assignment = algorithm(kenken)
+            dt = time() - dt
+            return assignment, (kenken.checks, kenken.nassigns, dt)
+
+    def gather(iterations,start_size,end_size,out):
+        if start_size < 3:
+            start_size = 3
+
+        bt         = lambda ken: csp.CSP.backtracking_search(ken)
+        fc         = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.forward_checking)
+        mac        = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.mac)
+
+        algorithms = {
+            "Backtracking": bt,
+            "Forward Checking": fc,
+            "Arc Consistency": mac,
+        }
+
+        with open(out, "w+") as file:
+
+            out = writer(file)
+
+            out.writerow(["Algorithm", "Size", "Number of Tests Boards", "Average Completion time"])
+
+            for name, algorithm in algorithms.items():
+                for size in range(start_size, end_size+1):
+                    checks, assignments, dt = (0, 0, 0)
+                    for iteration in range(1, iterations + 1):
+                        cliques = generateKenkenPuzzle.generate(size)
+
+                        assignment, data = kenkenGame.benchmark(kenkenGame(size, cliques), algorithm)
+
+                        print("algorithm =",  name, "size =", size, "iteration =", iteration, "result =", "Success" if assignment else "Failure", file=stderr)
+
+                        checks      += data[0] / iterations
+                        assignments += data[1] / iterations
+                        dt          += data[2] / iterations
+                        
+                    out.writerow([name, size, iterations, dt])
 
     def gui_border_configurations(cliques_gui,size):
         global top
@@ -247,7 +288,6 @@ class kenkenGame(csp.CSP):
                                 remove_border[pos2[0]][pos2[1]][right]=1
             operation[operator_box[0]][operator_box[1]] = operation_string
         return operation, remove_border
-     
         
     def puzzleToDictionary(remove_border,operation):
         api_result = {}
@@ -276,57 +316,11 @@ class kenkenGame(csp.CSP):
         api_result['values']= values
         return api_result
 
-
     def answerToDictionary(result):
         api_result = {
             'result': result,
         }
         return api_result
-
-
-    def benchmark(kenken, algorithm):
-            kenken.checks = kenken.nassigns = 0
-            dt = time()
-            assignment = algorithm(kenken)
-            dt = time() - dt
-            return assignment, (kenken.checks, kenken.nassigns, dt)
-
-
-    def gather(iterations,start_size,end_size,out):
-        if start_size < 3:
-            start_size = 3
-
-        bt         = lambda ken: csp.CSP.backtracking_search(ken)
-        fc         = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.forward_checking)
-        mac        = lambda ken: csp.CSP.backtracking_search(ken, inference=csp.CSP.mac)
-
-        algorithms = {
-            "Backtracking": bt,
-            "Forward Checking": fc,
-            "Arc Consistency": mac,
-        }
-
-        with open(out, "w+") as file:
-
-            out = writer(file)
-
-            out.writerow(["Algorithm", "Size", "Number of Tests Boards", "Average Completion time"])
-
-            for name, algorithm in algorithms.items():
-                for size in range(start_size, end_size+1):
-                    checks, assignments, dt = (0, 0, 0)
-                    for iteration in range(1, iterations + 1):
-                        cliques = generateKenkenPuzzle.generate(size)
-
-                        assignment, data = kenkenGame.benchmark(kenkenGame(size, cliques), algorithm)
-
-                        print("algorithm =",  name, "size =", size, "iteration =", iteration, "result =", "Success" if assignment else "Failure", file=stderr)
-
-                        checks      += data[0] / iterations
-                        assignments += data[1] / iterations
-                        dt          += data[2] / iterations
-                        
-                    out.writerow([name, size, iterations, dt])
 
 
 class serverFunctions(kenkenGame):
@@ -350,7 +344,6 @@ class serverFunctions(kenkenGame):
         result_arr=puzzleConfig.get_result_arr(assignment)
         result=kenkenGame.answerToDictionary(result_arr)
         return result     
-
 
         
 if __name__ == "__main__":
