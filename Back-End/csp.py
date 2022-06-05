@@ -1,3 +1,4 @@
+
 import random
 from functools import reduce
 
@@ -17,6 +18,7 @@ class utilities():
 
     def is_in(elt, seq):
         return any(x is elt for x in seq)
+
 
 class Problem(object):
 
@@ -41,8 +43,8 @@ class Problem(object):
 
     def value(self, state):
         raise NotImplementedError
-        
-# ...................
+
+
 class CSP(Problem):
 
     def __init__(self, variables, domains, neighbors, constraints):
@@ -63,8 +65,6 @@ class CSP(Problem):
         if var in assignment:
             del assignment[var]
 
-
-# **********
     def nconflicts(self, var, val, assignment):
         def conflict(var2):
             return (var2 in assignment and
@@ -82,6 +82,7 @@ class CSP(Problem):
                 and all(self.nconflicts(variables, assignment[variables], assignment) == 0
                         for variables in self.variables))
 
+
     def support_pruning(self):
         if self.curr_domains is None:
             self.curr_domains = {v: list(self.domains[v]) for v in self.variables}
@@ -92,20 +93,19 @@ class CSP(Problem):
         self.curr_domains[var] = [value]
         return removals
 
-
-
     def prune(self, var, value, removals):
         self.curr_domains[var].remove(value)
         if removals is not None:
             removals.append((var, value))
-                
-                
+
     def choices(self, var):
         return (self.curr_domains or self.domains)[var]
 
     def restore(self, removals):
         for B, b in removals:
             self.curr_domains[B].append(b)
+
+
 
     def AC3(csp, queue=None, removals=None):
         if queue is None:
@@ -120,6 +120,8 @@ class CSP(Problem):
                     if Xk != Xj:
                         queue.append((Xk, Xi))
         return True
+
+
     def revise(csp, Xi, Xj, removals):
         revised = False
         for x in csp.curr_domains[Xi][:]:
@@ -137,6 +139,7 @@ class CSP(Problem):
     def no_inference(csp, var, value, assignment, removals):
         return True
 
+
     def forward_checking(csp, var, value, assignment, removals):
         csp.support_pruning()
         for B in csp.neighbors[var]:
@@ -147,9 +150,13 @@ class CSP(Problem):
                 if not csp.curr_domains[B]:
                     return False
         return True
+
+
     def mac(csp, var, value, assignment, removals):
         #Maintain arc consistency.
         return CSP.AC3(csp, [(X, var) for X in csp.neighbors[var]], removals)
+
+
 
     def backtracking_search(csp,
                             select_unassigned_variable=first_unassigned_variable,
@@ -174,3 +181,4 @@ class CSP(Problem):
         result = backtrack({})
         assert result is None or csp.goal_test(result)
         return result
+
